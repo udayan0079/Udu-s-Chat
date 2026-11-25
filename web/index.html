@@ -34,24 +34,38 @@
         </div>
       </div>
 
-      <!-- Step 1: Email/Password + Google Sign-In -->
+      <!-- Step 1: Sign In -->
       <div id="authStepPhone" class="auth-step">
-        <h2>Sign in to udu's chat</h2>
-        <p class="muted">Sign in with Email & Password or continue with Gmail.</p>
-        <input id="emailInput" type="email" placeholder="Email address" autocomplete="email" />
-        <input id="passwordInput" type="password" placeholder="Password (min 6 chars)" autocomplete="current-password" />
-        <div class="row-gap">
-          <button id="emailSignInBtn" class="btn-primary flex-1">Log In</button>
-          <button id="emailSignUpBtn" class="btn-secondary flex-1">Sign Up</button>
-        </div>
+        <h2>Sign in</h2>
+        <p class="muted">Enter your Gmail and password to continue.</p>
+        <input id="emailInput" type="email" placeholder="Gmail address" autocomplete="email" />
+        <input id="passwordInput" type="password" placeholder="Password" autocomplete="current-password" />
+        <button id="emailSignInBtn" class="btn-primary full-width">Sign In</button>
         <div style="text-align:center;color:var(--text-muted);font-size:12px;">or</div>
         <button id="googleLoginBtn" class="btn-secondary full-width" style="display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600;">
           <span>🔵</span> Continue with Gmail
         </button>
-        <p id="authPhoneError" class="error-text hidden"></p>
-        <p class="small muted" style="text-align:center;margin-top:6px;">
-          <a href="/privacy.html" style="color:var(--emerald);text-decoration:none;">Privacy Policy</a>
+        <p class="small muted" style="text-align:center;margin-top:4px;">
+          Don't have an account? <a href="#" id="goToSignUpLink" style="color:var(--emerald);font-weight:600;text-decoration:none;">Sign Up</a>
         </p>
+        <p id="authPhoneError" class="error-text hidden"></p>
+        <p class="small muted" style="text-align:center;margin-top:4px;">
+          <a href="/privacy.html" style="color:var(--text-muted);text-decoration:none;">Privacy Policy</a>
+        </p>
+      </div>
+
+      <!-- Step 1b: Sign Up (Username + Gmail + Password) -->
+      <div id="authStepSignUp" class="auth-step hidden">
+        <h2>Create Account</h2>
+        <p class="muted">Pick a unique username with your Gmail and password.</p>
+        <input id="signUpNameInput" type="text" placeholder="Unique Username (e.g. udayan_07)" />
+        <input id="signUpEmailInput" type="email" placeholder="Gmail address (@gmail.com)" autocomplete="email" />
+        <input id="signUpPasswordInput" type="password" placeholder="Password (min 6 chars)" autocomplete="new-password" />
+        <button id="emailSignUpBtn" class="btn-primary full-width">Sign Up</button>
+        <p class="small muted" style="text-align:center;margin-top:4px;">
+          Already have an account? <a href="#" id="goToSignInLink" style="color:var(--emerald);font-weight:600;text-decoration:none;">Sign In</a>
+        </p>
+        <p id="authSignUpError" class="error-text hidden"></p>
       </div>
 
       <!-- Step 2: Profile (Unique Name) -->

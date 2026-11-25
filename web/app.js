@@ -104,15 +104,8 @@ onAuthStateChanged(auth, async (fbUser) => {
     $('appShell').classList.remove('mobile-chat-open');
     $('authScreen').classList.remove('hidden');
     $('authStepPhone').classList.remove('hidden');
+    $('authStepSignUp')?.classList.add('hidden');
     $('authStepProfile').classList.add('hidden');
-    $('splashScreen')?.classList.add('hidden');
-    return;
-  }
-
-  const isPasswordUser = fbUser.providerData?.some((p) => p.providerId === 'password');
-  if (isPasswordUser && !fbUser.emailVerified) {
-    await signOut(auth);
-    showAuthError('authPhoneError', `Please verify your Gmail (${fbUser.email}) via the link sent to your inbox, then Log In.`);
     $('splashScreen')?.classList.add('hidden');
     return;
   }
@@ -134,6 +127,7 @@ onAuthStateChanged(auth, async (fbUser) => {
     $('authScreen').classList.remove('hidden');
     $('appShell').classList.add('hidden');
     $('authStepPhone').classList.add('hidden');
+    $('authStepSignUp')?.classList.add('hidden');
     $('authStepProfile').classList.remove('hidden');
     $('splashScreen')?.classList.add('hidden');
   }
@@ -277,25 +271,59 @@ $('emailSignInBtn').onclick = async () => {
   }
 };
 
-$('emailSignUpBtn').onclick = async () => {
+$('goToSignUpLink').onclick = (e) => {
+  e.preventDefault();
   $('authPhoneError').classList.add('hidden');
-  const email = $('emailInput').value.trim();
-  const pass = $('passwordInput').value;
+  $('authStepPhone').classList.add('hidden');
+  $('authStepSignUp').classList.remove('hidden');
+};
+
+$('goToSignInLink').onclick = (e) => {
+  e.preventDefault();
+  $('authSignUpError').classList.add('hidden');
+  $('authStepSignUp').classList.add('hidden');
+  $('authStepPhone').classList.remove('hidden');
+};
+
+$('emailSignUpBtn').onclick = async () => {
+  $('authSignUpError').classList.add('hidden');
+  const displayName = $('signUpNameInput').value.trim();
+  const email = $('signUpEmailInput').value.trim();
+  const pass = $('signUpPasswordInput').value;
+  if (displayName.length < 3) {
+    showAuthError('authSignUpError', 'Username must be at least 3 characters.');
+    return;
+  }
   if (!isValidGmail(email)) {
-    showAuthError('authPhoneError', 'Please enter a valid @gmail.com address.');
+    showAuthError('authSignUpError', 'Please enter a valid @gmail.com address.');
     return;
   }
   if (pass.length < 6) {
-    showAuthError('authPhoneError', 'Password must be at least 6 characters.');
+    showAuthError('authSignUpError', 'Password must be at least 6 characters.');
     return;
   }
+  $('emailSignUpBtn').disabled = true;
+  $('emailSignUpBtn').textContent = 'Creating...';
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
-    await sendEmailVerification(cred.user);
-    await signOut(auth);
-    showAuthError('authPhoneError', `Verification link sent to ${email}. Verify your Gmail first, then Log In.`);
+    const profile = {
+      uid: cred.user.uid,
+      email,
+      phoneNumber: email,
+      displayName,
+      displayNameLower: displayName.toLowerCase(),
+      about: "Hey there! I am using udu's chat.",
+      isOnline: true,
+      lastSeenAt: Date.now(),
+    };
+    await setDoc(doc(db, 'users', cred.user.uid), profile, { merge: true });
+    state.user = profile;
+    enterMainApp();
   } catch (err) {
-    showAuthError('authPhoneError', err.message || 'Sign up failed.');
+    showAuthError('authSignUpError', err.message || 'Sign up failed.');
+  } finally {
+    $('emailSignUpBtn').disabled = false;
+    $('emailSignUpBtn').textContent = 'Sign Up';
   }
 };
 
