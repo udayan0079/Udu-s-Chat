@@ -32,11 +32,18 @@
         </div>
       </div>
 
-      <!-- Step 1: Google Sign-In Only -->
+      <!-- Step 1: Email/Password + Google Sign-In -->
       <div id="authStepPhone" class="auth-step">
         <h2>Sign in to udu's chat</h2>
-        <p class="muted">Continue with your Gmail account and pick a unique name to chat globally.</p>
-        <button id="googleLoginBtn" class="btn-primary full-width" style="display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600;">
+        <p class="muted">Sign in with Email & Password or continue with Gmail.</p>
+        <input id="emailInput" type="email" placeholder="Email address" autocomplete="email" />
+        <input id="passwordInput" type="password" placeholder="Password (min 6 chars)" autocomplete="current-password" />
+        <div class="row-gap">
+          <button id="emailSignInBtn" class="btn-primary flex-1">Sign In</button>
+          <button id="emailSignUpBtn" class="btn-secondary flex-1">Create Account</button>
+        </div>
+        <div style="text-align:center;color:var(--text-muted);font-size:12px;">or</div>
+        <button id="googleLoginBtn" class="btn-secondary full-width" style="display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600;">
           <span>🔵</span> Continue with Gmail
         </button>
         <p id="authPhoneError" class="error-text hidden"></p>

@@ -4,6 +4,8 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut,
 } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js';
 import {
@@ -242,6 +244,36 @@ if ($('backFromProfileBtn')) {
     await signOut(auth);
   };
 }
+
+$('emailSignInBtn').onclick = async () => {
+  $('authPhoneError').classList.add('hidden');
+  const email = $('emailInput').value.trim();
+  const pass = $('passwordInput').value;
+  if (!email || pass.length < 6) {
+    showAuthError('authPhoneError', 'Enter a valid email and password (min 6 characters).');
+    return;
+  }
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch (err) {
+    showAuthError('authPhoneError', err.message || 'Sign in failed.');
+  }
+};
+
+$('emailSignUpBtn').onclick = async () => {
+  $('authPhoneError').classList.add('hidden');
+  const email = $('emailInput').value.trim();
+  const pass = $('passwordInput').value;
+  if (!email || pass.length < 6) {
+    showAuthError('authPhoneError', 'Enter a valid email and password (min 6 characters).');
+    return;
+  }
+  try {
+    await createUserWithEmailAndPassword(auth, email, pass);
+  } catch (err) {
+    showAuthError('authPhoneError', err.message || 'Sign up failed.');
+  }
+};
 
 $('googleLoginBtn').onclick = async () => {
   $('authPhoneError').classList.add('hidden');
