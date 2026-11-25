@@ -1,44 +1,40 @@
 :root {
-  --bg-app: #0f1221;
-  --bg-panel: #161a2e;
-  --bg-rail: #1c2138;
-  --bg-hover: #252b48;
-  --bg-active: #2d3557;
-  --bg-chat: radial-gradient(circle at top right, rgba(139, 92, 246, 0.12), transparent 45%),
-             radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.12), transparent 45%),
-             #0f1221;
-  --bg-bubble-out: linear-gradient(135deg, #2563eb, #7c3aed);
-  --bg-bubble-in: #212640;
-  --text-primary: #f8fafc;
-  --text-muted: #94a3b8;
-  --border: rgba(255, 255, 255, 0.08);
-  --emerald: #60a5fa;
-  --emerald-hover: #3b82f6;
-  --brand-gradient: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
-  --danger: #f43f5e;
+  --bg-app: #fdf8f0;
+  --bg-panel: #fdf8f0;
+  --bg-rail: #fffaf3;
+  --bg-hover: #f5ede0;
+  --bg-active: #cceee2;
+  --bg-chat: #fbf5ea;
+  --bg-bubble-out: #bcead5;
+  --bg-bubble-in: #dcd3f4;
+  --text-primary: #3b2f2f;
+  --text-muted: #7c6f64;
+  --border: #eadfce;
+  --emerald: #4cae8c;
+  --emerald-hover: #3b9878;
+  --brand-gradient: linear-gradient(135deg, #6cc4a1, #9b89e8);
+  --danger: #e05d6f;
 }
 
-html[data-theme="light"] {
-  --bg-app: #f4f7ff;
-  --bg-panel: #ffffff;
-  --bg-rail: #f8faff;
-  --bg-hover: #eef2ff;
-  --bg-active: #e0e7ff;
-  --bg-chat: radial-gradient(circle at top right, rgba(168, 85, 247, 0.08), transparent 45%),
-             radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.08), transparent 45%),
-             #f4f7ff;
-  --bg-bubble-out: linear-gradient(135deg, #dbeafe, #ede9fe);
-  --bg-bubble-in: #ffffff;
-  --text-primary: #1e293b;
-  --text-muted: #64748b;
-  --border: rgba(59, 130, 246, 0.12);
+html[data-theme="dark"] {
+  --bg-app: #141522;
+  --bg-panel: #191b2b;
+  --bg-rail: #1f2235;
+  --bg-hover: #272b42;
+  --bg-active: #27443c;
+  --bg-chat: #141522;
+  --bg-bubble-out: #285e4f;
+  --bg-bubble-in: #38325a;
+  --text-primary: #f8fafc;
+  --text-muted: #9ca3af;
+  --border: rgba(255, 255, 255, 0.08);
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-family: "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 
 body {
@@ -337,13 +333,18 @@ input:focus { border-color: var(--emerald); }
 .chat-item {
   display: flex;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 12px 14px;
+  margin: 8px 12px;
   cursor: pointer;
-  border-bottom: 1px solid var(--border);
+  background: var(--bg-rail);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
   align-items: center;
+  box-shadow: 0 3px 10px rgba(90, 70, 50, 0.05);
+  transition: transform 0.12s ease, background 0.15s ease;
 }
-.chat-item:hover { background: var(--bg-hover); }
-.chat-item.active { background: var(--bg-active); }
+.chat-item:hover { background: var(--bg-hover); transform: translateY(-1px); }
+.chat-item.active { background: var(--bg-active); border-color: var(--emerald); }
 
 .chat-item-body { flex: 1; min-width: 0; }
 .chat-item-top { display: flex; justify-content: space-between; margin-bottom: 4px; }
