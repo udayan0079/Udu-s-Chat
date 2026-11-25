@@ -609,9 +609,32 @@ $('cancelReplyBtn').onclick = () => {
   replyTarget = null;
   $('replyBar').classList.add('hidden');
 };
+const EMOJI_LIST = [
+  '😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚',
+  '😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣',
+  '😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗',
+  '🤔','🤭','🤫','🤥','😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐',
+  '❤️','🧡','💛','💚','💙','💜','🖤','🤍','💔','❣️','💕','💞','💓','💗','💖','💘','💝','🔥','✨','🎉',
+  '👍','👎','👏','🙌','🤝','🙏','✌️','🤞','🤟','🤘','👌','🤌','👋','💪','🫶','🥳','💐','🌹','☕','🚀'
+];
+
+const pickerEl = $('emojiPicker');
+if (pickerEl) {
+  EMOJI_LIST.forEach((em) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'emoji-btn';
+    b.textContent = em;
+    b.onclick = () => {
+      $('messageInput').value += em;
+      $('messageInput').focus();
+    };
+    pickerEl.appendChild(b);
+  });
+}
+
 $('emojiQuickBtn').onclick = () => {
-  $('messageInput').value += '😊';
-  $('messageInput').focus();
+  $('emojiPicker').classList.toggle('hidden');
 };
 
 // File / Image upload to Firebase Storage

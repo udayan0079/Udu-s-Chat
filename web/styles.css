@@ -481,7 +481,35 @@ input:focus { border-color: var(--emerald); }
   font-size: 18px;
 }
 
+.emoji-picker {
+  background: var(--bg-panel);
+  border-top: 1px solid var(--border);
+  padding: 10px 14px;
+  max-height: 210px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+  gap: 6px;
+}
+.emoji-btn {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  line-height: 1.2;
+  padding: 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  transition: transform 0.12s ease, background 0.12s ease;
+}
+.emoji-btn:hover {
+  background: var(--bg-hover);
+  transform: scale(1.18);
+}
 .mobile-only { display: none; }
+.msg-bubble {
+  font-family: "Segoe UI", system-ui, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+}
 
 @media (max-width: 768px) {
   .mobile-only { display: inline-flex; }
