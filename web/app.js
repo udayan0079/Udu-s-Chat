@@ -105,7 +105,7 @@ onAuthStateChanged(auth, async (fbUser) => {
   }
 
   const userSnap = await getDoc(doc(db, 'users', fbUser.uid));
-  if (userSnap.exists() && userSnap.data().displayName) {
+  if (userSnap.exists() && userSnap.data().displayName && userSnap.data().phoneNumber) {
     state.user = { uid: fbUser.uid, ...userSnap.data() };
     await setDoc(
       doc(db, 'users', fbUser.uid),
@@ -318,9 +318,14 @@ $('googleLoginBtn').onclick = async () => {
 $('completeProfileBtn').onclick = async () => {
   const fbUser = auth.currentUser;
   if (!fbUser) return;
+  $('authProfileError').classList.add('hidden');
   const displayName = $('profileNameInput').value.trim() || fbUser.displayName || 'Udu User';
   let phoneInput = ($('profilePhoneInput').value || fbUser.phoneNumber || pendingPhone || '').trim().replace(/[\s\-()]/g, '');
   if (phoneInput.startsWith('01') && phoneInput.length === 11) phoneInput = `+880${phoneInput.slice(1)}`;
+  if (!/^\+[1-9]\d{6,14}$/.test(phoneInput)) {
+    showAuthError('authProfileError', 'Please enter a valid phone number (e.g. +8801834900891 or 01834900891).');
+    return;
+  }
   const about = $('profileAboutInput').value.trim() || "Hey there! I am using udu's chat.";
   const profile = {
     uid: fbUser.uid,
