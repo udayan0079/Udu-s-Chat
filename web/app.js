@@ -617,7 +617,7 @@ $('emojiQuickBtn').onclick = () => {
 };
 
 // File / Image upload to Firebase Storage
-$('fileInput').onchange = async (e) => {
+if ($('fileInput')) $('fileInput').onchange = async (e) => {
   const file = e.target.files?.[0];
   if (!file || !state.activeChatId) return;
   try {
@@ -810,8 +810,8 @@ function closeCallOverlay() {
   $('callOverlay').classList.add('hidden');
 }
 
-$('voiceCallBtn').onclick = () => startCall('VOICE');
-$('videoCallBtn').onclick = () => startCall('VIDEO');
+if ($('voiceCallBtn')) $('voiceCallBtn').onclick = () => startCall('VOICE');
+if ($('videoCallBtn')) $('videoCallBtn').onclick = () => startCall('VIDEO');
 $('endCallBtn').onclick = async () => {
   if (activeCallId) {
     await updateDoc(doc(db, 'calls', activeCallId), { status: 'ENDED', endedAt: Date.now() }).catch(() => {});
