@@ -308,6 +308,7 @@ $('googleLoginBtn').onclick = async () => {
   $('authPhoneError').classList.add('hidden');
   try {
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
     await signInWithPopup(auth, provider);
   } catch (err) {
     showAuthError('authPhoneError', err.message || 'Google Sign-In failed.');
