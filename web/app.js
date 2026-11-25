@@ -520,41 +520,44 @@ function renderMessages() {
 
     row.innerHTML = `
       <div class="msg-bubble">
-        ${!isOut ? `<div class="small" style="color:var(--emerald);font-weight:600;margin-bottom:2px;">${escapeHtml(m.senderName || '')}</div>` : ''}
         ${replyHtml}
         ${mediaHtml}
         <div>${escapeHtml(m.text || '')}</div>
-        ${reactionsHtml}
         <div class="msg-meta">
-          <span>${formatTime(m.createdAt)}</span>
-          ${isOut ? `<span style="color:${m.status === 'READ' ? '#53bdeb' : 'inherit'}">✓✓</span>` : ''}
+          <span>${escapeHtml(m.senderName || '')} • ${formatTime(m.createdAt)}</span>
+          ${isOut ? `<span>✓✓</span>` : ''}
+          ${isOut ? `<button class="msg-del-inline" data-act="del" title="Delete my message" style="background:none;border:none;color:inherit;cursor:pointer;font-size:11px;opacity:0.75;margin-left:4px;">🗑️</button>` : ''}
         </div>
-      </div>
-      <div class="msg-actions">
-        <button data-act="reply">Reply</button>
-        <button data-act="react">❤️</button>
-        <button data-act="del">Delete</button>
       </div>
     `;
 
-    row.querySelector('[data-act="reply"]').onclick = () => {
+    const triggerReply = () => {
       replyTarget = { id: m.id, senderName: m.senderName || 'User', preview: m.text || m.fileName || 'Media' };
       $('replySender').textContent = replyTarget.senderName;
       $('replyPreviewText').textContent = replyTarget.preview;
       $('replyBar').classList.remove('hidden');
       $('messageInput').focus();
     };
-    row.querySelector('[data-act="react"]').onclick = async () => {
-      const current = m.reactions?.[myUid];
-      await updateDoc(doc(db, 'chats', state.activeChatId, 'messages', m.id), {
-        [`reactions.${myUid}`]: current === '❤️' ? null : '❤️',
-      });
-    };
-    row.querySelector('[data-act="del"]').onclick = async () => {
-      await updateDoc(doc(db, 'chats', state.activeChatId, 'messages', m.id), {
-        deletedFor: arrayUnion(myUid),
-      });
-    };
+
+    // Swipe right on mobile or double-click on PC to reply
+    let touchStartX = 0;
+    row.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    row.addEventListener('touchend', (e) => {
+      const diffX = e.changedTouches[0].clientX - touchStartX;
+      if (diffX > 45) triggerReply();
+    }, { passive: true });
+    row.ondblclick = triggerReply;
+
+    if (isOut) {
+      row.querySelector('[data-act="del"]').onclick = async (e) => {
+        e.stopPropagation();
+        await updateDoc(doc(db, 'chats', state.activeChatId, 'messages', m.id), {
+          deletedFor: arrayUnion(myUid),
+        });
+      };
+    }
 
     container.appendChild(row);
   });
