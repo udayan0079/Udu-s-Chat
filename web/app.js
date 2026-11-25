@@ -247,12 +247,18 @@ if ($('backFromProfileBtn')) {
   };
 }
 
+const isValidGmail = (email) => /^[^\s@]+@gmail\.com$/i.test(email);
+
 $('emailSignInBtn').onclick = async () => {
   $('authPhoneError').classList.add('hidden');
   const email = $('emailInput').value.trim();
   const pass = $('passwordInput').value;
-  if (!email || pass.length < 6) {
-    showAuthError('authPhoneError', 'Enter a valid email and password (min 6 characters).');
+  if (!isValidGmail(email)) {
+    showAuthError('authPhoneError', 'Please enter a valid @gmail.com address.');
+    return;
+  }
+  if (pass.length < 6) {
+    showAuthError('authPhoneError', 'Password must be at least 6 characters.');
     return;
   }
   try {
@@ -266,8 +272,12 @@ $('emailSignUpBtn').onclick = async () => {
   $('authPhoneError').classList.add('hidden');
   const email = $('emailInput').value.trim();
   const pass = $('passwordInput').value;
-  if (!email || pass.length < 6) {
-    showAuthError('authPhoneError', 'Enter a valid email and password (min 6 characters).');
+  if (!isValidGmail(email)) {
+    showAuthError('authPhoneError', 'Please enter a valid @gmail.com address.');
+    return;
+  }
+  if (pass.length < 6) {
+    showAuthError('authPhoneError', 'Password must be at least 6 characters.');
     return;
   }
   try {
