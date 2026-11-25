@@ -221,8 +221,15 @@ function selectChat(chatId) {
   });
 
   updateDoc(doc(db, 'chats', chatId), { [`unread_${state.user.uid}`]: 0 }).catch(() => {});
+  $('appShell').classList.add('mobile-chat-open');
   renderChatList();
   renderActiveChatHeader();
+}
+
+if ($('mobileBackBtn')) {
+  $('mobileBackBtn').onclick = () => {
+    $('appShell').classList.remove('mobile-chat-open');
+  };
 }
 
 // Auth Actions
