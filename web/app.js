@@ -35,7 +35,15 @@ import {
 
 import { firebaseConfig } from './firebase-config.js';
 
-const app = initializeApp(firebaseConfig);
+const runtimeConfig = {
+  ...firebaseConfig,
+  authDomain:
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'udu-s-chat.firebaseapp.com'
+      : window.location.hostname,
+};
+
+const app = initializeApp(runtimeConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
