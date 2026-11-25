@@ -260,7 +260,7 @@ if ($('backFromProfileBtn')) {
 
 const isValidGmail = (email) => /^[^\s@]+@gmail\.com$/i.test(email);
 
-$('emailSignInBtn').onclick = async () => {
+if ($('emailSignInBtn')) $('emailSignInBtn').onclick = async () => {
   $('authPhoneError').classList.add('hidden');
   const email = $('emailInput').value.trim();
   const pass = $('passwordInput').value;
@@ -279,21 +279,21 @@ $('emailSignInBtn').onclick = async () => {
   }
 };
 
-$('goToSignUpLink').onclick = (e) => {
+if ($('goToSignUpLink')) $('goToSignUpLink').onclick = (e) => {
   e.preventDefault();
   $('authPhoneError').classList.add('hidden');
   $('authStepPhone').classList.add('hidden');
   $('authStepSignUp').classList.remove('hidden');
 };
 
-$('goToSignInLink').onclick = (e) => {
+if ($('goToSignInLink')) $('goToSignInLink').onclick = (e) => {
   e.preventDefault();
   $('authSignUpError').classList.add('hidden');
   $('authStepSignUp').classList.add('hidden');
   $('authStepPhone').classList.remove('hidden');
 };
 
-$('emailSignUpBtn').onclick = async () => {
+if ($('emailSignUpBtn')) $('emailSignUpBtn').onclick = async () => {
   $('authSignUpError').classList.add('hidden');
   const displayName = $('signUpNameInput').value.trim();
   const email = $('signUpEmailInput').value.trim();
