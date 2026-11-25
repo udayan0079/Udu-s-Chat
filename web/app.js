@@ -4,6 +4,8 @@ import {
   onAuthStateChanged,
   RecaptchaVerifier,
   signInWithPhoneNumber,
+  GoogleAuthProvider,
+  signInWithPopup,
   signOut,
 } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js';
 import {
@@ -113,6 +115,12 @@ onAuthStateChanged(auth, async (fbUser) => {
     enterMainApp();
   } else {
     pendingPhone = fbUser.phoneNumber || pendingPhone;
+    if (fbUser.displayName && !$('profileNameInput').value) {
+      $('profileNameInput').value = fbUser.displayName;
+    }
+    if (fbUser.phoneNumber) {
+      $('profilePhoneInput').value = fbUser.phoneNumber;
+    }
     $('authScreen').classList.remove('hidden');
     $('appShell').classList.add('hidden');
     $('authStepPhone').classList.add('hidden');
@@ -290,14 +298,26 @@ $('verifyOtpBtn').onclick = async () => {
   }
 };
 
+$('googleLoginBtn').onclick = async () => {
+  $('authPhoneError').classList.add('hidden');
+  try {
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
+  } catch (err) {
+    showAuthError('authPhoneError', err.message || 'Google Sign-In failed.');
+  }
+};
+
 $('completeProfileBtn').onclick = async () => {
   const fbUser = auth.currentUser;
   if (!fbUser) return;
-  const displayName = $('profileNameInput').value.trim() || 'Udu User';
+  const displayName = $('profileNameInput').value.trim() || fbUser.displayName || 'Udu User';
+  let phoneInput = ($('profilePhoneInput').value || fbUser.phoneNumber || pendingPhone || '').trim().replace(/[\s\-()]/g, '');
+  if (phoneInput.startsWith('01') && phoneInput.length === 11) phoneInput = `+880${phoneInput.slice(1)}`;
   const about = $('profileAboutInput').value.trim() || "Hey there! I am using udu's chat.";
   const profile = {
     uid: fbUser.uid,
-    phoneNumber: fbUser.phoneNumber || pendingPhone,
+    phoneNumber: phoneInput,
     displayName,
     about,
     isOnline: true,

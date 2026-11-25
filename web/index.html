@@ -36,6 +36,10 @@
           <input id="phoneInput" type="tel" placeholder="1712345678" autocomplete="tel" />
         </div>
         <button id="sendOtpBtn" class="btn-primary full-width">Send OTP</button>
+        <div style="text-align:center;color:var(--text-muted);font-size:12px;">or</div>
+        <button id="googleLoginBtn" class="btn-secondary full-width" style="display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600;">
+          <span>🔵</span> Continue with Google
+        </button>
         <div id="recaptcha-container"></div>
         <p id="authPhoneError" class="error-text hidden"></p>
         <div class="demo-note">Connected to Firebase Cloud (<code>udu-s-chat</code>). Enter your real or test phone number.</div>
@@ -56,8 +60,9 @@
       <!-- Step 3: Profile -->
       <div id="authStepProfile" class="auth-step hidden">
         <h2>Profile Info</h2>
-        <p class="muted">Set your display name and about status.</p>
+        <p class="muted">Set your display name, phone number, and about status.</p>
         <input id="profileNameInput" type="text" placeholder="Your Name (e.g. Muhaiminur)" />
+        <input id="profilePhoneInput" type="tel" placeholder="Phone (+8801834900891)" />
         <input id="profileAboutInput" type="text" value="Hey there! I am using udu's chat." placeholder="About" />
         <button id="completeProfileBtn" class="btn-primary full-width">Start Chatting</button>
       </div>
