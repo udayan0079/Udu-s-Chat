@@ -232,7 +232,8 @@ function selectChat(chatId) {
 }
 
 if ($('mobileBackBtn')) {
-  $('mobileBackBtn').onclick = () => {
+  $('mobileBackBtn').onclick = (e) => {
+    e.stopPropagation();
     $('appShell').classList.remove('mobile-chat-open');
   };
 }
@@ -508,7 +509,7 @@ function showChatProfileModal(chat) {
       const name = u?.displayName || chat.participantNames?.[uid] || 'Member';
       const isAdmin = admins.includes(uid);
       return `
-        <div class="chat-item" style="margin:6px 0;padding:8px 12px;cursor:default;">
+        <div class="chat-item ${uid !== myUid ? 'group-member-link' : ''}" data-uid="${uid}" style="margin:6px 0;padding:8px 12px;cursor:${uid !== myUid ? 'pointer' : 'default'};">
           <div class="avatar-sm">${name[0].toUpperCase()}</div>
           <div class="chat-item-body">
             <div class="chat-item-title">${escapeHtml(name)} ${uid === myUid ? '(You)' : ''}</div>
@@ -522,11 +523,23 @@ function showChatProfileModal(chat) {
       <div style="text-align:center;margin-bottom:14px;">
         <div class="avatar-lg" style="margin:0 auto 8px;">👥</div>
         <h3>${escapeHtml(chat.title || 'Group')}</h3>
-        <p class="muted small">${memberIds.length} members</p>
+        <p class="muted small">${memberIds.length} members • Tap a member to chat</p>
       </div>
       <div class="small muted" style="margin-bottom:6px;font-weight:600;">Members</div>
       <div style="max-height:240px;overflow-y:auto;">${membersHtml}</div>
     `);
+    document.querySelectorAll('.group-member-link').forEach((el) => {
+      el.onclick = async () => {
+        const targetUid = el.dataset.uid;
+        const targetUser = state.users.find((x) => x.uid === targetUid) || {
+          uid: targetUid,
+          displayName: chat.participantNames?.[targetUid] || 'Member',
+          phoneNumber: chat.participantPhones?.[targetUid] || '',
+        };
+        closeModal();
+        await openDirectChatWithUser(targetUser);
+      };
+    });
   } else {
     const otherUid = (chat.participantIds || []).find((id) => id !== myUid);
     const other = state.users.find((u) => u.uid === otherUid);
@@ -581,7 +594,6 @@ function renderMessages() {
         <div class="msg-meta">
           <span>${escapeHtml(m.senderName || '')} • ${formatTime(m.createdAt)}</span>
           ${isOut ? `<span>✓✓</span>` : ''}
-          ${isOut ? `<button class="msg-del-inline" data-act="del" title="Delete my message" style="background:none;border:none;color:inherit;cursor:pointer;font-size:11px;opacity:0.75;margin-left:4px;">🗑️</button>` : ''}
         </div>
       </div>
     `;
@@ -594,25 +606,45 @@ function renderMessages() {
       $('messageInput').focus();
     };
 
-    // Swipe right on mobile or double-click on PC to reply
-    let touchStartX = 0;
-    row.addEventListener('touchstart', (e) => {
-      touchStartX = e.touches[0].clientX;
-    }, { passive: true });
-    row.addEventListener('touchend', (e) => {
-      const diffX = e.changedTouches[0].clientX - touchStartX;
-      if (diffX > 45) triggerReply();
-    }, { passive: true });
-    row.ondblclick = triggerReply;
-
-    if (isOut) {
-      row.querySelector('[data-act="del"]').onclick = async (e) => {
-        e.stopPropagation();
+    const promptDeleteMyMessage = () => {
+      if (!isOut) return;
+      openModal('Delete Message?', `
+        <p class="muted small">Do you want to delete this message?</p>
+        <div class="row-gap" style="margin-top:14px;">
+          <button id="cancelDelBtn" class="btn-secondary flex-1">No</button>
+          <button id="confirmDelBtn" class="btn-danger flex-1">Yes, Delete</button>
+        </div>
+      `);
+      $('cancelDelBtn').onclick = closeModal;
+      $('confirmDelBtn').onclick = async () => {
+        closeModal();
         await updateDoc(doc(db, 'chats', state.activeChatId, 'messages', m.id), {
           deletedFor: arrayUnion(myUid),
         });
       };
-    }
+    };
+
+    // Swipe right on mobile or double-click on PC to reply; hold 800ms on own msg to delete
+    let touchStartX = 0;
+    let holdTimer = null;
+    row.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      if (isOut) holdTimer = setTimeout(promptDeleteMyMessage, 800);
+    }, { passive: true });
+    row.addEventListener('touchmove', () => {
+      clearTimeout(holdTimer);
+    }, { passive: true });
+    row.addEventListener('touchend', (e) => {
+      clearTimeout(holdTimer);
+      const diffX = e.changedTouches[0].clientX - touchStartX;
+      if (diffX > 45) triggerReply();
+    }, { passive: true });
+    row.addEventListener('mousedown', () => {
+      if (isOut) holdTimer = setTimeout(promptDeleteMyMessage, 800);
+    });
+    row.addEventListener('mouseup', () => clearTimeout(holdTimer));
+    row.addEventListener('mouseleave', () => clearTimeout(holdTimer));
+    row.ondblclick = triggerReply;
 
     container.appendChild(row);
   });
