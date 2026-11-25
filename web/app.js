@@ -158,12 +158,8 @@ function attachRealtimeListeners() {
     state.chats = snap.docs
       .map((d) => ({ id: d.id, ...d.data() }))
       .sort((a, b) => (b.lastMessageTime || 0) - (a.lastMessageTime || 0));
-    if (!state.activeChatId && state.chats.length > 0) {
-      selectChat(state.chats[0].id);
-    } else {
-      renderChatList();
-      renderActiveChatHeader();
-    }
+    renderChatList();
+    renderActiveChatHeader();
   });
 
   // 2. Statuses
