@@ -1,19 +1,19 @@
 :root {
-  --bg-app: #fdf8f0;
-  --bg-panel: #fdf8f0;
-  --bg-rail: #fffaf3;
-  --bg-hover: #f5ede0;
-  --bg-active: #cceee2;
-  --bg-chat: #fbf5ea;
-  --bg-bubble-out: #bcead5;
-  --bg-bubble-in: #dcd3f4;
-  --text-primary: #3b2f2f;
-  --text-muted: #7c6f64;
-  --border: #eadfce;
-  --emerald: #4cae8c;
-  --emerald-hover: #3b9878;
-  --brand-gradient: linear-gradient(135deg, #6cc4a1, #9b89e8);
-  --danger: #e05d6f;
+  --bg-app: linear-gradient(145deg, #e7f6f2 0%, #f3ecff 52%, #fdeee6 100%);
+  --bg-panel: transparent;
+  --bg-rail: rgba(255, 255, 255, 0.76);
+  --bg-hover: rgba(255, 255, 255, 0.95);
+  --bg-active: rgba(237, 233, 254, 0.92);
+  --bg-chat: transparent;
+  --bg-bubble-out: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  --bg-bubble-in: rgba(255, 255, 255, 0.88);
+  --text-primary: #1f2937;
+  --text-muted: #6b7280;
+  --border: rgba(255, 255, 255, 0.85);
+  --emerald: #7c3aed;
+  --emerald-hover: #6d28d9;
+  --brand-gradient: linear-gradient(135deg, #8b5cf6, #ec4899);
+  --danger: #f43f5e;
 }
 
 html[data-theme="dark"] {
@@ -308,6 +308,12 @@ input:focus { border-color: var(--emerald); }
 }
 
 .search-box { padding: 10px 14px 6px; }
+.search-box input {
+  border-radius: 24px;
+  background: var(--bg-rail);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 14px rgba(100, 116, 139, 0.06);
+}
 .filter-chips {
   display: flex;
   gap: 6px;
@@ -337,10 +343,11 @@ input:focus { border-color: var(--emerald); }
   margin: 8px 12px;
   cursor: pointer;
   background: var(--bg-rail);
-  border: 1.5px solid var(--border);
-  border-radius: 20px;
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 22px;
   align-items: center;
-  box-shadow: 0 3px 10px rgba(90, 70, 50, 0.05);
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.06);
   transition: transform 0.12s ease, background 0.15s ease;
 }
 .chat-item:hover { background: var(--bg-hover); transform: translateY(-1px); }
@@ -352,11 +359,11 @@ input:focus { border-color: var(--emerald); }
 .chat-item-preview { font-size: 13px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .unread-badge {
-  background: var(--emerald);
-  color: #111b21;
+  background: #fb923c;
+  color: #fff;
   font-size: 11px;
   font-weight: 700;
-  padding: 2px 7px;
+  padding: 2px 8px;
   border-radius: 12px;
 }
 
