@@ -489,7 +489,62 @@ function renderActiveChatHeader() {
   $('activeChatAvatar').textContent = chat.type === 'GROUP' ? '👥' : title[0].toUpperCase();
   $('activeChatTitle').textContent = title;
   const typingOthers = (chat.typingUserIds || []).filter((id) => id !== state.user.uid);
-  $('activeChatSubtitle').textContent = typingOthers.length > 0 ? 'typing...' : (chat.type === 'GROUP' ? `${(chat.participantIds || []).length} members` : 'online');
+  $('activeChatSubtitle').textContent = typingOthers.length > 0 ? 'typing...' : (chat.type === 'GROUP' ? `${(chat.participantIds || []).length} members • Tap for info` : 'Tap for profile');
+
+  const headerLeft = document.querySelector('.chat-header-left');
+  if (headerLeft) {
+    headerLeft.style.cursor = 'pointer';
+    headerLeft.onclick = () => showChatProfileModal(chat);
+  }
+}
+
+function showChatProfileModal(chat) {
+  const myUid = state.user.uid;
+  if (chat.type === 'GROUP') {
+    const memberIds = chat.participantIds || [];
+    const admins = chat.adminIds || [];
+    const membersHtml = memberIds.map((uid) => {
+      const u = uid === myUid ? state.user : state.users.find((x) => x.uid === uid);
+      const name = u?.displayName || chat.participantNames?.[uid] || 'Member';
+      const isAdmin = admins.includes(uid);
+      return `
+        <div class="chat-item" style="margin:6px 0;padding:8px 12px;cursor:default;">
+          <div class="avatar-sm">${name[0].toUpperCase()}</div>
+          <div class="chat-item-body">
+            <div class="chat-item-title">${escapeHtml(name)} ${uid === myUid ? '(You)' : ''}</div>
+            <div class="small muted">${escapeHtml(u?.about || '')}</div>
+          </div>
+          ${isAdmin ? '<span class="small" style="color:var(--emerald);font-weight:700;">Admin</span>' : ''}
+        </div>
+      `;
+    }).join('');
+    openModal('Group Info', `
+      <div style="text-align:center;margin-bottom:14px;">
+        <div class="avatar-lg" style="margin:0 auto 8px;">👥</div>
+        <h3>${escapeHtml(chat.title || 'Group')}</h3>
+        <p class="muted small">${memberIds.length} members</p>
+      </div>
+      <div class="small muted" style="margin-bottom:6px;font-weight:600;">Members</div>
+      <div style="max-height:240px;overflow-y:auto;">${membersHtml}</div>
+    `);
+  } else {
+    const otherUid = (chat.participantIds || []).find((id) => id !== myUid);
+    const other = state.users.find((u) => u.uid === otherUid);
+    const name = other?.displayName || chatDisplayTitle(chat);
+    const about = other?.about || "Hey there! I am using udu's chat.";
+    const contact = other?.email || other?.phoneNumber || chat.participantPhones?.[otherUid] || '';
+    openModal('User Profile', `
+      <div style="text-align:center;">
+        <div class="avatar-xl">${name[0].toUpperCase()}</div>
+        <h3>${escapeHtml(name)}</h3>
+        <p class="muted small" style="margin-top:4px;">${escapeHtml(contact)}</p>
+        <div style="margin-top:14px;padding:12px;background:var(--bg-hover);border-radius:12px;text-align:left;">
+          <div class="small muted">About</div>
+          <div style="margin-top:4px;">${escapeHtml(about)}</div>
+        </div>
+      </div>
+    `);
+  }
 }
 
 function renderMessages() {
