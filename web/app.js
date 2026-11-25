@@ -746,22 +746,59 @@ $('newChatBtn').onclick = () => {
   };
 };
 
-// New Group
+// New Group with Multi-Member Selection
 $('newGroupBtn').onclick = () => {
+  const selected = new Set();
   openModal('Create Group', `
-    <input id="newGroupTitle" type="text" placeholder="Group Name" />
+    <input id="newGroupTitle" type="text" placeholder="Group Name" style="margin-bottom:8px;" />
+    <input id="groupMemberSearch" type="text" placeholder="Search members..." style="margin-bottom:8px;" />
+    <div id="groupMembersList" style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:6px;"></div>
+    <p id="groupErr" class="error-text hidden" style="margin-top:6px;"></p>
     <button id="createGroupBtn" class="btn-primary full-width" style="margin-top:12px;">Create Group</button>
   `);
+
+  const renderGroupMembers = (term) => {
+    const box = $('groupMembersList');
+    const items = term.trim() ? findMatchingUsers(term) : state.users;
+    box.innerHTML = items.length === 0 ? '<div class="muted small" style="padding:8px;">No registered users found.</div>' : '';
+    items.forEach((u) => {
+      const name = u.displayName || u.phoneNumber || u.email;
+      const row = document.createElement('label');
+      row.className = 'chat-item';
+      row.style.cursor = 'pointer';
+      row.innerHTML = `
+        <input type="checkbox" ${selected.has(u.uid) ? 'checked' : ''} style="width:auto;margin-right:8px;" />
+        <div class="avatar-sm">${name[0].toUpperCase()}</div>
+        <div class="chat-item-body">
+          <div class="chat-item-title">${escapeHtml(name)}</div>
+        </div>
+      `;
+      const cb = row.querySelector('input');
+      cb.onchange = () => {
+        if (cb.checked) selected.add(u.uid);
+        else selected.delete(u.uid);
+      };
+      box.appendChild(row);
+    });
+  };
+  renderGroupMembers('');
+  $('groupMemberSearch').oninput = (e) => renderGroupMembers(e.target.value);
+
   $('createGroupBtn').onclick = async () => {
     const title = $('newGroupTitle').value.trim();
-    if (!title) return;
+    if (!title) {
+      $('groupErr').textContent = 'Please enter a group name.';
+      $('groupErr').classList.remove('hidden');
+      return;
+    }
     const chatId = `grp_${crypto.randomUUID()}`;
     const me = state.user;
-    await setDoc(doc(db, 'chats', chatId), {
+    const members = [me.uid, ...Array.from(selected)];
+    const payload = {
       type: 'GROUP',
       title,
       description: '',
-      participantIds: [me.uid],
+      participantIds: members,
       adminIds: [me.uid],
       lastMessagePreview: `${me.displayName} created group "${title}"`,
       lastMessageSenderId: me.uid,
@@ -769,7 +806,9 @@ $('newGroupBtn').onclick = () => {
       lastMessageStatus: 'SENT',
       lastMessageTime: Date.now(),
       disappearingSeconds: 0,
-    });
+    };
+    await setDoc(doc(db, 'chats', chatId), payload);
+    state.chats.unshift({ id: chatId, ...payload });
     closeModal();
     selectChat(chatId);
   };
