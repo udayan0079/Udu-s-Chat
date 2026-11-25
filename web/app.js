@@ -93,11 +93,16 @@ function ensureRecaptcha() {
 
 // Listen for real Firebase Auth state
 onAuthStateChanged(auth, async (fbUser) => {
+  $('splashScreen')?.classList.add('hidden');
   if (!fbUser) {
     cleanupListeners();
     state.user = null;
-    $('authScreen').classList.remove('hidden');
+    state.chats = [];
+    state.messages = [];
+    state.activeChatId = null;
     $('appShell').classList.add('hidden');
+    $('appShell').classList.remove('mobile-chat-open');
+    $('authScreen').classList.remove('hidden');
     $('authStepPhone').classList.remove('hidden');
     $('authStepProfile').classList.add('hidden');
     return;

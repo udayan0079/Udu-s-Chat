@@ -7,8 +7,17 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- Splash Screen -->
+  <div id="splashScreen" class="splash-overlay">
+    <div class="splash-content">
+      <img src="splash.jpg" alt="udu's chat" class="splash-img" />
+      <h1 style="margin-top:16px;font-size:26px;">udu's chat</h1>
+      <p class="muted small" style="margin-top:6px;">Connecting securely...</p>
+    </div>
+  </div>
+
   <!-- Auth Overlay -->
-  <div id="authScreen" class="auth-overlay">
+  <div id="authScreen" class="auth-overlay hidden">
     <div class="auth-card">
       <div class="auth-logo">
         <span class="logo-badge">💬</span>

@@ -116,10 +116,29 @@ input:focus { border-color: var(--emerald); }
 }
 .icon-btn:hover { background: var(--bg-hover); }
 
+/* Splash Screen */
+.splash-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at center, #0c2b26 0%, #0b141a 75%);
+  text-align: center;
+}
+.splash-img {
+  width: 140px;
+  height: 140px;
+  border-radius: 32px;
+  object-fit: cover;
+  box-shadow: 0 18px 48px rgba(0, 168, 132, 0.3);
+}
+
 /* Auth Screen */
 .auth-overlay {
   position: fixed;
   inset: 0;
+  z-index: 100;
   display: grid;
   place-items: center;
   background: linear-gradient(135deg, #075e54 0%, #0b141a 60%);
