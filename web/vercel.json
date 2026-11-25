@@ -1,4 +1,10 @@
 {
   "buildCommand": "node gen-config.mjs",
-  "outputDirectory": "."
+  "outputDirectory": ".",
+  "rewrites": [
+    {
+      "source": "/__/auth/(.*)",
+      "destination": "https://udu-s-chat.firebaseapp.com/__/auth/$1"
+    }
+  ]
 }

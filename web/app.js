@@ -2,8 +2,6 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.3.1/firebas
 import {
   getAuth,
   onAuthStateChanged,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
   GoogleAuthProvider,
   signInWithPopup,
   signOut,
