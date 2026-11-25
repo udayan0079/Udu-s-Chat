@@ -375,26 +375,34 @@ function findMatchingUsers(term) {
 }
 
 async function openDirectChatWithUser(other) {
-  const me = state.user;
-  const chatId = [me.uid, other.uid].sort().join('_');
-  const chatDoc = await getDoc(doc(db, 'chats', chatId));
-  if (!chatDoc.exists()) {
-    await setDoc(doc(db, 'chats', chatId), {
-      type: 'DIRECT',
-      participantIds: [me.uid, other.uid],
-      adminIds: [],
-      participantNames: { [me.uid]: me.displayName, [other.uid]: other.displayName || other.phoneNumber },
-      participantPhones: { [me.uid]: me.phoneNumber, [other.uid]: other.phoneNumber },
-      participantAvatars: { [me.uid]: '', [other.uid]: '' },
-      lastMessagePreview: '',
-      lastMessageSenderId: '',
-      lastMessageType: 'TEXT',
-      lastMessageStatus: 'SENT',
-      lastMessageTime: Date.now(),
-      disappearingSeconds: 0,
-    });
+  try {
+    const me = state.user;
+    const chatId = [me.uid, other.uid].sort().join('_');
+    const existing = state.chats.find((c) => c.id === chatId);
+    if (!existing) {
+      const payload = {
+        type: 'DIRECT',
+        participantIds: [me.uid, other.uid],
+        adminIds: [],
+        participantNames: { [me.uid]: me.displayName, [other.uid]: other.displayName || other.phoneNumber },
+        participantPhones: { [me.uid]: me.phoneNumber, [other.uid]: other.phoneNumber },
+        participantAvatars: { [me.uid]: '', [other.uid]: '' },
+        lastMessagePreview: '',
+        lastMessageSenderId: '',
+        lastMessageType: 'TEXT',
+        lastMessageStatus: 'SENT',
+        lastMessageTime: Date.now(),
+        disappearingSeconds: 0,
+      };
+      await setDoc(doc(db, 'chats', chatId), payload);
+      state.chats.unshift({ id: chatId, ...payload });
+    }
+    state.search = '';
+    $('chatSearchInput').value = '';
+    selectChat(chatId);
+  } catch (err) {
+    alert('Could not open chat: ' + (err.message || err));
   }
-  selectChat(chatId);
 }
 
 function renderChatList() {
