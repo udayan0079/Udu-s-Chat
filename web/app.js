@@ -6,6 +6,7 @@ import {
   signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
   signOut,
 } from 'https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js';
 import {
@@ -104,6 +105,14 @@ onAuthStateChanged(auth, async (fbUser) => {
     $('authScreen').classList.remove('hidden');
     $('authStepPhone').classList.remove('hidden');
     $('authStepProfile').classList.add('hidden');
+    $('splashScreen')?.classList.add('hidden');
+    return;
+  }
+
+  const isPasswordUser = fbUser.providerData?.some((p) => p.providerId === 'password');
+  if (isPasswordUser && !fbUser.emailVerified) {
+    await signOut(auth);
+    showAuthError('authPhoneError', `Please verify your Gmail (${fbUser.email}) via the link sent to your inbox, then Log In.`);
     $('splashScreen')?.classList.add('hidden');
     return;
   }
@@ -281,7 +290,10 @@ $('emailSignUpBtn').onclick = async () => {
     return;
   }
   try {
-    await createUserWithEmailAndPassword(auth, email, pass);
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    await sendEmailVerification(cred.user);
+    await signOut(auth);
+    showAuthError('authPhoneError', `Verification link sent to ${email}. Verify your Gmail first, then Log In.`);
   } catch (err) {
     showAuthError('authPhoneError', err.message || 'Sign up failed.');
   }
