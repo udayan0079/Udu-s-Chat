@@ -93,7 +93,6 @@ function ensureRecaptcha() {
 
 // Listen for real Firebase Auth state
 onAuthStateChanged(auth, async (fbUser) => {
-  $('splashScreen')?.classList.add('hidden');
   if (!fbUser) {
     cleanupListeners();
     state.user = null;
@@ -105,6 +104,7 @@ onAuthStateChanged(auth, async (fbUser) => {
     $('authScreen').classList.remove('hidden');
     $('authStepPhone').classList.remove('hidden');
     $('authStepProfile').classList.add('hidden');
+    $('splashScreen')?.classList.add('hidden');
     return;
   }
 
@@ -117,6 +117,7 @@ onAuthStateChanged(auth, async (fbUser) => {
       { merge: true }
     );
     enterMainApp();
+    $('splashScreen')?.classList.add('hidden');
   } else {
     if (fbUser.displayName && !$('profileNameInput').value) {
       $('profileNameInput').value = fbUser.displayName;
@@ -125,6 +126,7 @@ onAuthStateChanged(auth, async (fbUser) => {
     $('appShell').classList.add('hidden');
     $('authStepPhone').classList.add('hidden');
     $('authStepProfile').classList.remove('hidden');
+    $('splashScreen')?.classList.add('hidden');
   }
 });
 
