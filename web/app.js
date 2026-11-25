@@ -639,7 +639,7 @@ if ($('fileInput')) $('fileInput').onchange = async (e) => {
 };
 
 // Voice Note Recording -> Firebase Storage
-$('recordVoiceBtn').onclick = async () => {
+if ($('recordVoiceBtn')) $('recordVoiceBtn').onclick = async () => {
   if (mediaRecorder && mediaRecorder.state === 'recording') {
     mediaRecorder.stop();
     $('recordVoiceBtn').classList.remove('recording');
