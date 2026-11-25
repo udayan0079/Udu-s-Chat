@@ -202,6 +202,8 @@ function attachRealtimeListeners() {
 
 function selectChat(chatId) {
   state.activeChatId = chatId;
+  state.messages = [];
+  renderMessages();
   unsubMessages?.();
 
   const msgsQ = query(
