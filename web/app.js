@@ -298,6 +298,12 @@ $('verifyOtpBtn').onclick = async () => {
   }
 };
 
+if ($('backFromProfileBtn')) {
+  $('backFromProfileBtn').onclick = async () => {
+    await signOut(auth);
+  };
+}
+
 $('googleLoginBtn').onclick = async () => {
   $('authPhoneError').classList.add('hidden');
   try {
