@@ -99,13 +99,12 @@ onAuthStateChanged(auth, async (fbUser) => {
     $('authScreen').classList.remove('hidden');
     $('appShell').classList.add('hidden');
     $('authStepPhone').classList.remove('hidden');
-    $('authStepOtp').classList.add('hidden');
     $('authStepProfile').classList.add('hidden');
     return;
   }
 
   const userSnap = await getDoc(doc(db, 'users', fbUser.uid));
-  if (userSnap.exists() && userSnap.data().displayName && userSnap.data().phoneNumber) {
+  if (userSnap.exists() && userSnap.data().displayName) {
     state.user = { uid: fbUser.uid, ...userSnap.data() };
     await setDoc(
       doc(db, 'users', fbUser.uid),
@@ -114,17 +113,12 @@ onAuthStateChanged(auth, async (fbUser) => {
     );
     enterMainApp();
   } else {
-    pendingPhone = fbUser.phoneNumber || pendingPhone;
     if (fbUser.displayName && !$('profileNameInput').value) {
       $('profileNameInput').value = fbUser.displayName;
-    }
-    if (fbUser.phoneNumber) {
-      $('profilePhoneInput').value = fbUser.phoneNumber;
     }
     $('authScreen').classList.remove('hidden');
     $('appShell').classList.add('hidden');
     $('authStepPhone').classList.add('hidden');
-    $('authStepOtp').classList.add('hidden');
     $('authStepProfile').classList.remove('hidden');
   }
 });
@@ -149,11 +143,11 @@ function attachRealtimeListeners() {
   cleanupListeners();
   const uid = state.user.uid;
 
-  // 0. Registered users directory for phone/name search
+  // 0. Registered users directory for unique name/phone search
   unsubUsers = onSnapshot(collection(db, 'users'), (snap) => {
     state.users = snap.docs
       .map((d) => ({ uid: d.id, ...d.data() }))
-      .filter((u) => u.uid !== uid && u.phoneNumber)
+      .filter((u) => u.uid !== uid && (u.displayName || u.phoneNumber))
       .sort((a, b) => (a.displayName || '').localeCompare(b.displayName || ''));
     renderChatList();
   });
@@ -240,64 +234,7 @@ if ($('mobileBackBtn')) {
   };
 }
 
-// Auth Actions
-$('sendOtpBtn').onclick = async () => {
-  const code = $('countrySelect').value;
-  let num = $('phoneInput').value.replace(/\D/g, '');
-  if (code === '+880' && num.startsWith('0')) {
-    num = num.slice(1);
-  }
-  if (num.length < 7) {
-    showAuthError('authPhoneError', 'Please enter a valid mobile number.');
-    return;
-  }
-  pendingPhone = `${code}${num}`;
-  $('authPhoneError').classList.add('hidden');
-  $('sendOtpBtn').disabled = true;
-  $('sendOtpBtn').textContent = 'Sending OTP...';
-
-  try {
-    const verifier = ensureRecaptcha();
-    confirmationResult = await signInWithPhoneNumber(auth, pendingPhone, verifier);
-    $('otpPhoneDisplay').textContent = pendingPhone;
-    $('authStepPhone').classList.add('hidden');
-    $('authStepOtp').classList.remove('hidden');
-  } catch (err) {
-    showAuthError('authPhoneError', err.message || 'Failed to send OTP. Enable Phone Auth in Firebase Console.');
-    if (recaptchaVerifier) {
-      recaptchaVerifier.clear();
-      recaptchaVerifier = null;
-    }
-  } finally {
-    $('sendOtpBtn').disabled = false;
-    $('sendOtpBtn').textContent = 'Send OTP';
-  }
-};
-
-$('backToPhoneBtn').onclick = () => {
-  $('authStepOtp').classList.add('hidden');
-  $('authStepPhone').classList.remove('hidden');
-};
-
-$('verifyOtpBtn').onclick = async () => {
-  const otp = $('otpInput').value.trim();
-  if (!/^\d{6}$/.test(otp)) {
-    showAuthError('authOtpError', 'Enter the 6-digit OTP code.');
-    return;
-  }
-  $('authOtpError').classList.add('hidden');
-  $('verifyOtpBtn').disabled = true;
-  $('verifyOtpBtn').textContent = 'Verifying...';
-  try {
-    await confirmationResult.confirm(otp);
-  } catch (err) {
-    showAuthError('authOtpError', err.message || 'Invalid OTP code.');
-  } finally {
-    $('verifyOtpBtn').disabled = false;
-    $('verifyOtpBtn').textContent = 'Verify OTP';
-  }
-};
-
+// Auth Actions (Gmail / Google only + Unique Name)
 if ($('backFromProfileBtn')) {
   $('backFromProfileBtn').onclick = async () => {
     await signOut(auth);
@@ -319,25 +256,47 @@ $('completeProfileBtn').onclick = async () => {
   const fbUser = auth.currentUser;
   if (!fbUser) return;
   $('authProfileError').classList.add('hidden');
-  const displayName = $('profileNameInput').value.trim() || fbUser.displayName || 'Udu User';
-  let phoneInput = ($('profilePhoneInput').value || fbUser.phoneNumber || pendingPhone || '').trim().replace(/[\s\-()]/g, '');
-  if (phoneInput.startsWith('01') && phoneInput.length === 11) phoneInput = `+880${phoneInput.slice(1)}`;
-  if (!/^\+[1-9]\d{6,14}$/.test(phoneInput)) {
-    showAuthError('authProfileError', 'Please enter a valid phone number (e.g. +8801834900891 or 01834900891).');
+  const displayName = $('profileNameInput').value.trim();
+  if (displayName.length < 3) {
+    showAuthError('authProfileError', 'Please enter a unique name (at least 3 characters).');
     return;
   }
-  const about = $('profileAboutInput').value.trim() || "Hey there! I am using udu's chat.";
-  const profile = {
-    uid: fbUser.uid,
-    phoneNumber: phoneInput,
-    displayName,
-    about,
-    isOnline: true,
-    lastSeenAt: Date.now(),
-  };
-  await setDoc(doc(db, 'users', fbUser.uid), profile, { merge: true });
-  state.user = profile;
-  enterMainApp();
+
+  $('completeProfileBtn').disabled = true;
+  $('completeProfileBtn').textContent = 'Checking...';
+  try {
+    const nameLower = displayName.toLowerCase();
+    const allUsers = await getDocs(collection(db, 'users'));
+    const taken = allUsers.docs.some((d) => {
+      if (d.id === fbUser.uid) return false;
+      const existing = (d.data().displayName || '').trim().toLowerCase();
+      return existing === nameLower;
+    });
+    if (taken) {
+      showAuthError('authProfileError', `"${displayName}" is already taken. Please choose another unique name.`);
+      return;
+    }
+
+    const about = $('profileAboutInput').value.trim() || "Hey there! I am using udu's chat.";
+    const profile = {
+      uid: fbUser.uid,
+      email: fbUser.email || '',
+      phoneNumber: fbUser.email || '',
+      displayName,
+      displayNameLower: nameLower,
+      about,
+      isOnline: true,
+      lastSeenAt: Date.now(),
+    };
+    await setDoc(doc(db, 'users', fbUser.uid), profile, { merge: true });
+    state.user = profile;
+    enterMainApp();
+  } catch (err) {
+    showAuthError('authProfileError', err.message || 'Could not save profile.');
+  } finally {
+    $('completeProfileBtn').disabled = false;
+    $('completeProfileBtn').textContent = 'Start Chatting';
+  }
 };
 
 function showAuthError(elId, msg) {

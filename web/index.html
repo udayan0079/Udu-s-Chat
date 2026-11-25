@@ -18,51 +18,21 @@
         </div>
       </div>
 
-      <!-- Step 1: Phone -->
+      <!-- Step 1: Google Sign-In Only -->
       <div id="authStepPhone" class="auth-step">
-        <h2>Enter your phone number</h2>
-        <p class="muted">Select your country code and enter your valid mobile number to connect.</p>
-        <div class="input-group">
-          <select id="countrySelect">
-            <option value="+880">🇧🇩 +880 (Bangladesh)</option>
-            <option value="+91">🇮🇳 +91 (India)</option>
-            <option value="+1">🇺🇸 +1 (USA/Canada)</option>
-            <option value="+44">🇬🇧 +44 (UK)</option>
-            <option value="+966">🇸🇦 +966 (Saudi Arabia)</option>
-            <option value="+971">🇦🇪 +971 (UAE)</option>
-            <option value="+60">🇲🇾 +60 (Malaysia)</option>
-            <option value="+65">🇸🇬 +65 (Singapore)</option>
-          </select>
-          <input id="phoneInput" type="tel" placeholder="1712345678" autocomplete="tel" />
-        </div>
-        <button id="sendOtpBtn" class="btn-primary full-width">Send OTP</button>
-        <div style="text-align:center;color:var(--text-muted);font-size:12px;">or</div>
-        <button id="googleLoginBtn" class="btn-secondary full-width" style="display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600;">
-          <span>🔵</span> Continue with Google
+        <h2>Sign in to udu's chat</h2>
+        <p class="muted">Continue with your Gmail account and pick a unique name to chat globally.</p>
+        <button id="googleLoginBtn" class="btn-primary full-width" style="display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600;">
+          <span>🔵</span> Continue with Gmail
         </button>
-        <div id="recaptcha-container"></div>
         <p id="authPhoneError" class="error-text hidden"></p>
-        <div class="demo-note">Connected to Firebase Cloud (<code>udu-s-chat</code>). Enter your real or test phone number.</div>
       </div>
 
-      <!-- Step 2: OTP -->
-      <div id="authStepOtp" class="auth-step hidden">
-        <h2>Verify <span id="otpPhoneDisplay"></span></h2>
-        <p class="muted">Enter the 6-digit verification code (Demo: e.g. <code>123456</code>).</p>
-        <input id="otpInput" type="text" maxlength="6" placeholder="123456" class="otp-input" />
-        <div class="row-gap">
-          <button id="backToPhoneBtn" class="btn-secondary">Back</button>
-          <button id="verifyOtpBtn" class="btn-primary flex-1">Verify OTP</button>
-        </div>
-        <p id="authOtpError" class="error-text hidden"></p>
-      </div>
-
-      <!-- Step 3: Profile -->
+      <!-- Step 2: Profile (Unique Name) -->
       <div id="authStepProfile" class="auth-step hidden">
-        <h2>Profile Info</h2>
-        <p class="muted">Set your display name, phone number, and about status.</p>
-        <input id="profileNameInput" type="text" placeholder="Your Name (e.g. Muhaiminur)" />
-        <input id="profilePhoneInput" type="tel" placeholder="Phone (+8801834900891)" />
+        <h2>Choose Unique Name</h2>
+        <p class="muted">Pick a unique name so friends can easily search and chat with you.</p>
+        <input id="profileNameInput" type="text" placeholder="Unique Name (e.g. udayan_07)" />
         <input id="profileAboutInput" type="text" value="Hey there! I am using udu's chat." placeholder="About" />
         <div class="row-gap">
           <button id="backFromProfileBtn" class="btn-secondary">Back</button>
