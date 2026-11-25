@@ -591,14 +591,18 @@ async function sendCurrentMessage(extra = {}) {
   replyTarget = null;
   $('replyBar').classList.add('hidden');
 
-  await setDoc(doc(db, 'chats', chatId, 'messages', msgId), payload);
-  await updateDoc(doc(db, 'chats', chatId), {
-    lastMessagePreview: text || extra.fileName || extra.type,
-    lastMessageSenderId: me.uid,
-    lastMessageType: payload.type,
-    lastMessageStatus: 'SENT',
-    lastMessageTime: now,
-  });
+  try {
+    await setDoc(doc(db, 'chats', chatId, 'messages', msgId), payload);
+    await updateDoc(doc(db, 'chats', chatId), {
+      lastMessagePreview: text || extra.fileName || extra.type,
+      lastMessageSenderId: me.uid,
+      lastMessageType: payload.type,
+      lastMessageStatus: 'SENT',
+      lastMessageTime: now,
+    });
+  } catch (err) {
+    alert('Message send failed: ' + (err.message || err));
+  }
 }
 
 $('sendMessageBtn').onclick = () => sendCurrentMessage();
