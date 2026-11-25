@@ -110,6 +110,14 @@ onAuthStateChanged(auth, async (fbUser) => {
     return;
   }
 
+  const isPasswordUser = fbUser.providerData?.some((p) => p.providerId === 'password');
+  if (isPasswordUser && !fbUser.emailVerified) {
+    await signOut(auth);
+    showAuthError('authPhoneError', `Please verify your Gmail (${fbUser.email}) via the link sent to your inbox, then Sign In.`);
+    $('splashScreen')?.classList.add('hidden');
+    return;
+  }
+
   const userSnap = await getDoc(doc(db, 'users', fbUser.uid));
   if (userSnap.exists() && userSnap.data().displayName) {
     state.user = { uid: fbUser.uid, ...userSnap.data() };
@@ -317,8 +325,11 @@ $('emailSignUpBtn').onclick = async () => {
       lastSeenAt: Date.now(),
     };
     await setDoc(doc(db, 'users', cred.user.uid), profile, { merge: true });
-    state.user = profile;
-    enterMainApp();
+    await sendEmailVerification(cred.user);
+    await signOut(auth);
+    $('authStepSignUp').classList.add('hidden');
+    $('authStepPhone').classList.remove('hidden');
+    showAuthError('authPhoneError', `Verification link sent to ${email}. Open your Gmail & verify first, then Sign In.`);
   } catch (err) {
     showAuthError('authSignUpError', err.message || 'Sign up failed.');
   } finally {
