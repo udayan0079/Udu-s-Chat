@@ -1,0 +1,7 @@
+{
+  "name": "udus-chat-web",
+  "private": true,
+  "scripts": {
+    "build": "node gen-config.mjs"
+  }
+}

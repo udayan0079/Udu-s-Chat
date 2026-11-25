@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>udu's chat — Web</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Auth Overlay -->
+  <div id="authScreen" class="auth-overlay">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <span class="logo-badge">💬</span>
+        <div>
+          <h1>udu's chat</h1>
+          <p class="subtitle">Global Messaging • Web Edition</p>
+        </div>
+      </div>
+
+      <!-- Step 1: Phone -->
+      <div id="authStepPhone" class="auth-step">
+        <h2>Enter your phone number</h2>
+        <p class="muted">Select your country code and enter your valid mobile number to connect.</p>
+        <div class="input-group">
+          <select id="countrySelect">
+            <option value="+880">🇧🇩 +880 (Bangladesh)</option>
+            <option value="+91">🇮🇳 +91 (India)</option>
+            <option value="+1">🇺🇸 +1 (USA/Canada)</option>
+            <option value="+44">🇬🇧 +44 (UK)</option>
+            <option value="+966">🇸🇦 +966 (Saudi Arabia)</option>
+            <option value="+971">🇦🇪 +971 (UAE)</option>
+            <option value="+60">🇲🇾 +60 (Malaysia)</option>
+            <option value="+65">🇸🇬 +65 (Singapore)</option>
+          </select>
+          <input id="phoneInput" type="tel" placeholder="1712345678" autocomplete="tel" />
+        </div>
+        <button id="sendOtpBtn" class="btn-primary full-width">Send OTP</button>
+        <div id="recaptcha-container"></div>
+        <p id="authPhoneError" class="error-text hidden"></p>
+        <div class="demo-note">Connected to Firebase Cloud (<code>udu-s-chat</code>). Enter your real or test phone number.</div>
+      </div>
+
+      <!-- Step 2: OTP -->
+      <div id="authStepOtp" class="auth-step hidden">
+        <h2>Verify <span id="otpPhoneDisplay"></span></h2>
+        <p class="muted">Enter the 6-digit verification code (Demo: e.g. <code>123456</code>).</p>
+        <input id="otpInput" type="text" maxlength="6" placeholder="123456" class="otp-input" />
+        <div class="row-gap">
+          <button id="backToPhoneBtn" class="btn-secondary">Back</button>
+          <button id="verifyOtpBtn" class="btn-primary flex-1">Verify OTP</button>
+        </div>
+        <p id="authOtpError" class="error-text hidden"></p>
+      </div>
+
+      <!-- Step 3: Profile -->
+      <div id="authStepProfile" class="auth-step hidden">
+        <h2>Profile Info</h2>
+        <p class="muted">Set your display name and about status.</p>
+        <input id="profileNameInput" type="text" placeholder="Your Name (e.g. Muhaiminur)" />
+        <input id="profileAboutInput" type="text" value="Hey there! I am using udu's chat." placeholder="About" />
+        <button id="completeProfileBtn" class="btn-primary full-width">Start Chatting</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App Shell -->
+  <div id="appShell" class="app-shell hidden">
+    <!-- Left Navigation Rail -->
+    <nav class="nav-rail">
+      <div class="rail-top">
+        <button class="rail-btn active" data-tab="chats" title="Chats">💬</button>
+        <button class="rail-btn" data-tab="updates" title="Updates / Status">⭕</button>
+        <button class="rail-btn" data-tab="calls" title="Calls">📞</button>
+      </div>
+      <div class="rail-bottom">
+        <button id="themeToggleBtn" class="rail-btn" title="Toggle Light/Dark">🌓</button>
+        <button class="rail-btn" data-tab="settings" title="Settings">⚙️</button>
+        <div id="railAvatar" class="avatar-sm" title="Profile">U</div>
+      </div>
+    </nav>
+
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <header class="sidebar-header">
+        <div>
+          <h2 id="sidebarTitle">udu's chat</h2>
+          <span class="status-pill" id="modeBadge">● Cloud Connected</span>
+        </div>
+        <div class="header-actions">
+          <button id="newGroupBtn" class="icon-btn" title="New Group">👥</button>
+          <button id="newChatBtn" class="icon-btn" title="New Chat">➕</button>
+        </div>
+      </header>
+
+      <!-- Chats Tab -->
+      <div id="tabChats" class="tab-panel">
+        <div class="search-box">
+          <input id="chatSearchInput" type="text" placeholder="Search or start new chat..." />
+        </div>
+        <div class="filter-chips">
+          <button class="chip active" data-filter="all">All</button>
+          <button class="chip" data-filter="unread">Unread</button>
+          <button class="chip" data-filter="favorites">Favorites</button>
+          <button class="chip" data-filter="groups">Groups</button>
+        </div>
+        <div id="chatList" class="list-scroll"></div>
+      </div>
+
+      <!-- Updates / Status Tab -->
+      <div id="tabUpdates" class="tab-panel hidden">
+        <div class="section-pad">
+          <button id="addStatusBtn" class="btn-primary full-width">+ Add Status Update</button>
+        </div>
+        <div id="statusList" class="list-scroll"></div>
+      </div>
+
+      <!-- Calls Tab -->
+      <div id="tabCalls" class="tab-panel hidden">
+        <div class="section-pad row-between">
+          <span class="muted">Recent Calls</span>
+          <button id="clearCallsBtn" class="btn-text">Clear</button>
+        </div>
+        <div id="callsList" class="list-scroll"></div>
+      </div>
+
+      <!-- Settings Tab -->
+      <div id="tabSettings" class="tab-panel hidden">
+        <div class="list-scroll section-pad">
+          <div class="profile-card">
+            <div id="settingsAvatar" class="avatar-lg">U</div>
+            <div>
+              <h3 id="settingsName">User</h3>
+              <p id="settingsPhone" class="muted"></p>
+              <p id="settingsAbout" class="muted small"></p>
+            </div>
+          </div>
+          <div class="settings-group">
+            <label class="setting-row">
+              <span>Dark Mode</span>
+              <input id="darkModeSwitch" type="checkbox" checked />
+            </label>
+            <label class="setting-row">
+              <span>Read Receipts (Blue Ticks)</span>
+              <input id="readReceiptsSwitch" type="checkbox" checked />
+            </label>
+            <label class="setting-row">
+              <span>Last Seen Visible</span>
+              <input id="lastSeenSwitch" type="checkbox" checked />
+            </label>
+          </div>
+          <button id="editProfileBtn" class="btn-secondary full-width">Edit Profile</button>
+          <button id="signOutBtn" class="btn-danger full-width" style="margin-top: 10px;">Sign Out</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Right Main Pane -->
+    <main class="chat-pane">
+      <div id="emptyState" class="empty-state">
+        <div class="empty-icon">💬</div>
+        <h2>udu's chat for Web</h2>
+        <p class="muted">Select a chat on the left to send messages, voice notes, photos, and make demo voice/video calls.</p>
+      </div>
+
+      <div id="activeChatView" class="active-chat hidden">
+        <header class="chat-header">
+          <div class="chat-header-left">
+            <div id="activeChatAvatar" class="avatar-md">A</div>
+            <div>
+              <h3 id="activeChatTitle">Contact Name</h3>
+              <p id="activeChatSubtitle" class="muted small">online</p>
+            </div>
+          </div>
+          <div class="chat-header-actions">
+            <button id="voiceCallBtn" class="icon-btn" title="Voice Call">📞</button>
+            <button id="videoCallBtn" class="icon-btn" title="Video Call">📹</button>
+            <button id="pinChatBtn" class="icon-btn" title="Pin Chat">📌</button>
+            <button id="muteChatBtn" class="icon-btn" title="Mute Chat">🔕</button>
+          </div>
+        </header>
+
+        <div id="messagesContainer" class="messages-area"></div>
+
+        <!-- Reply Preview -->
+        <div id="replyBar" class="reply-bar hidden">
+          <div>
+            <strong id="replySender"></strong>
+            <p id="replyPreviewText" class="muted small"></p>
+          </div>
+          <button id="cancelReplyBtn" class="icon-btn">✖</button>
+        </div>
+
+        <!-- Composer -->
+        <footer class="composer">
+          <label class="icon-btn" title="Attach Photo / File">
+            📎
+            <input id="fileInput" type="file" hidden />
+          </label>
+          <button id="emojiQuickBtn" class="icon-btn" title="Insert Emoji">😊</button>
+          <input id="messageInput" type="text" placeholder="Type a message..." />
+          <button id="recordVoiceBtn" class="icon-btn" title="Record Voice Note">🎤</button>
+          <button id="sendMessageBtn" class="btn-send" title="Send">➤</button>
+        </footer>
+      </div>
+    </main>
+  </div>
+
+  <!-- Active Call Overlay -->
+  <div id="callOverlay" class="modal-overlay hidden">
+    <div class="call-card">
+      <div id="callAvatar" class="avatar-xl">A</div>
+      <h2 id="callContactName">Contact</h2>
+      <p id="callStatusText" class="muted">Calling...</p>
+      <div class="call-controls">
+        <button id="toggleMuteCallBtn" class="call-ctrl-btn" title="Mute">🎙️</button>
+        <button id="toggleSpeakerBtn" class="call-ctrl-btn" title="Speaker">🔊</button>
+        <button id="endCallBtn" class="call-end-btn" title="End Call">📵</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Viewer Overlay -->
+  <div id="statusOverlay" class="modal-overlay hidden">
+    <div class="status-viewer-card">
+      <div class="status-progress"><div id="statusProgressBar" class="status-progress-fill"></div></div>
+      <div class="row-between" style="margin-bottom: 16px;">
+        <strong id="statusViewerName"></strong>
+        <button id="closeStatusBtn" class="icon-btn">✖</button>
+      </div>
+      <div id="statusViewerBody" class="status-viewer-body"></div>
+      <p id="statusViewerTime" class="muted small" style="margin-top: 12px;"></p>
+    </div>
+  </div>
+
+  <!-- Generic Modal (New Chat / Group / Status / Edit Profile) -->
+  <div id="genericModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="row-between">
+        <h3 id="modalTitle">Modal</h3>
+        <button id="closeModalBtn" class="icon-btn">✖</button>
+      </div>
+      <div id="modalBody" style="margin-top: 12px;"></div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

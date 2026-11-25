@@ -1,0 +1,2 @@
+-keep class com.uduschat.app.** { *; }
+-dontwarn com.google.firebase.**
